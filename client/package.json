@@ -1,0 +1,25 @@
+{
+  "name": "cat-learning",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ScottBouloutian/cat-learning.git",
+  "author": "Scott Bouloutian <ScottBouloutian@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.17.1",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4",
+    "parcel-bundler": "^1.12.3"
+  },
+  "dependencies": {
+    "ml5": "^0.2.3",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  },
+  "scripts": {
+    "start": "parcel index.html",
+    "lint": "eslint src"
+  }
+}
