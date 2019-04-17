@@ -1,0 +1,14 @@
+{
+  "name": "cat-learning",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ScottBouloutian/cat-learning.git",
+  "author": "Scott Bouloutian <ScottBouloutian@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^1.0.3",
+    "get-pixels": "^3.3.2",
+    "lodash": "^4.17.11",
+    "rxjs": "^6.4.0"
+  }
+}
