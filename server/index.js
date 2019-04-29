@@ -74,53 +74,68 @@ async function getFace(file) {
   )(faceData);
 }
 
-getFiles()
-  .subscribe(
-    files => {
-      const fileDataset = tf.data.array(files);
-      const dataset = fileDataset
-        .mapAsync(file => (
-          Promise
-            .all([getImage(file), getFace(file)])
-            .then(([ xs, ys ]) => ({ xs, ys }))
-        ))
-        .batch(10);
-      const model = tf.sequential();
-      model.add(tf.layers.dense({ inputShape: [64, 64, 1], units: 64 * 64 }));
-      model.add(tf.layers.conv2d({
-        filters: 32,
-        kernelSize: 5,
-        strides: 1,
-        padding: 'same',
-        activation: 'relu',
-      }));
-      model.add(tf.layers.maxPooling2d({ poolSize: 5, padding: 'same' }));
-      model.add(tf.layers.conv2d({
-        filters: 50,
-        kernelSize: 5,
-        strides: 1,
-        padding: 'same',
-        activation: 'relu',
-      }));
-      model.add(tf.layers.maxPooling2d({ poolSize: 5, padding: 'same' }));
-      model.add(tf.layers.conv2d({
-        filters: 80,
-        kernelSize: 5,
-        strides: 1,
-        padding: 'same',
-        activation: 'relu',
-      }));
-      model.add(tf.layers.maxPooling2d({ poolSize: 5, padding: 'same' }));
-      model.add(tf.layers.dropout({ rate: .25 }));
-      model.add(tf.layers.flatten());
-      model.add(tf.layers.dense({ units: 512 }));
-      model.add(tf.layers.dropout({ rate: .5 }));
-      model.add(tf.layers.dense({ units: 9 }));
-      const optimizer = tf.train.adam();
-      model.compile({ optimizer, loss: 'categoricalCrossentropy' });
-      model.fitDataset(dataset, { epochs: 3 })
-        .then(() => model.save(`file://${dataDirectory}/model.tf`))
-        .then(() => console.log('done'));
-    },
-    error => console.error(error),
-  );
+// Creates and compiles a model
+function createModel() {
+  const model = tf.sequential();
+  model.add(tf.layers.dense({ inputShape: [64, 64, 1], units: 64 * 64 }));
+  model.add(tf.layers.conv2d({
+    filters: 32,
+    kernelSize: 5,
+    strides: 1,
+    padding: 'same',
+    activation: 'relu',
+  }));
+  model.add(tf.layers.maxPooling2d({ poolSize: 5, padding: 'same' }));
+  model.add(tf.layers.conv2d({
+    filters: 50,
+    kernelSize: 5,
+    strides: 1,
+    padding: 'same',
+    activation: 'relu',
+  }));
+  model.add(tf.layers.maxPooling2d({ poolSize: 5, padding: 'same' }));
+  model.add(tf.layers.conv2d({
+    filters: 80,
+    kernelSize: 5,
+    strides: 1,
+    padding: 'same',
+    activation: 'relu',
+  }));
+  model.add(tf.layers.maxPooling2d({ poolSize: 5, padding: 'same' }));
+  model.add(tf.layers.dropout({ rate: .25 }));
+  model.add(tf.layers.flatten());
+  model.add(tf.layers.dense({ units: 512 }));
+  model.add(tf.layers.dropout({ rate: .5 }));
+  model.add(tf.layers.dense({ units: 9 }));
+  const optimizer = tf.train.adam();
+  model.compile({ optimizer, loss: 'categoricalCrossentropy' });
+  return model;
+}
+
+function trainModel() {
+  getFiles()
+    .subscribe(
+      files => {
+        const fileDataset = tf.data.array(files);
+        const dataset = fileDataset
+          .mapAsync(file => (
+            Promise
+              .all([getImage(file), getFace(file)])
+              .then(([ xs, ys ]) => ({ xs, ys }))
+          ))
+          .batch(10);
+        const model = createModel();
+        model.fitDataset(dataset, { epochs: 3 })
+          .then(() => model.save(`file://${dataDirectory}/model.tf`))
+          .then(() => console.log('done'));
+      },
+      error => console.error(error),
+    );
+}
+
+async function predictImage() {
+  const model = await tf.loadLayersModel(`file://${dataDirectory}/model.tf/model.json`);
+  const image = await getImage("cat.jpg");
+  const input = image.reshape([1, 64, 64, 1]);
+  return model.predict(input);
+}
