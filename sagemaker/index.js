@@ -13,12 +13,13 @@ const _zip = require('lodash/fp/zip');
 const { loadImage, createCanvas } = require('canvas');
 
 const s3 = new S3({ apiVersion: '2006-03-01' });
-const dataDirectory = '/Users/scottbouloutian/Desktop/cats';
+const dataDirectory = 'C:\\Users\\Scott\\Documents\\cats';
 const readDir = bindNodeCallback(fs.readdir);
 const upload = bindNodeCallback(s3.upload.bind(s3));
 const readFile = bindNodeCallback(fs.readFile);
 const writeFile = bindNodeCallback(fs.writeFile);
-const directoryPattern = /^CAT_\d{2}$/;
+const unlink = bindNodeCallback(fs.unlink);
+const directoryPattern = /^CAT_00$/;
 const validationDirectory = "CAT_06";
 const filePattern = /^\d{8}_\d{3}\.jpg$/;
 const bucket = 'scottbouloutian-dev';
@@ -27,6 +28,7 @@ const bucket = 'scottbouloutian-dev';
 function getFiles() {
   return readDir(dataDirectory).pipe(
     mergeMap(from),
+    tap(console.log),
     filter(file => directoryPattern.test(file)),
     mergeMap(directory => (
       readDir(`${dataDirectory}/${directory}`).pipe(
@@ -39,7 +41,6 @@ function getFiles() {
       )
     )),
     filter(file => directoryPattern.test(file.directory) && filePattern.test(file.name)),
-    take(1),
   );
 }
 
@@ -53,6 +54,7 @@ function uploadFile(file) {
   });
 }
 
+// Read face feature data
 function readFaceData(file) {
   return readFile(`${file.path}.cat`, 'utf8').pipe(
     map(split(' ')),
@@ -87,12 +89,24 @@ function annotateImage(file) {
       return toBuffer();
     }),
     mergeMap(buffer => writeFile(`${file.path}.png`, buffer)),
-  )
+    mergeMap(() => uploadFile(
+        {
+            ...file,
+            name: replace(/\.jpg$/, '.png')(file.name),
+            type: `${file.type}_annotation`,
+            path: `${file.path}.png`,
+        }
+    )),
+    mergeMap(() => unlink(`${file.path}.png`)),
+  );
 }
 
 getFiles().pipe(
-  tap(console.log),
-  mergeMap(file => {
-    return annotateImage(file);
-  }),
-).subscribe(console.log, console.error);
+  mergeMap(file => zip(
+      uploadFile(file),
+      annotateImage(file),
+  )),
+).subscribe(
+    ([s3Response]) => console.log(s3Response.key),
+    console.error,
+);
