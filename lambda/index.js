@@ -40,13 +40,13 @@ module.exports.endpoint = async (event) => {
     Accept: 'image/png',
     ContentType: 'image/jpeg',
   }).toPromise();
-  console.log(response);
   return {
     statusCode: 200,
     headers: {
-      ['content-type']: 'image/png',
+      ['content-type']: 'text/plain',
+      ['Access-Control-Allow-Headers']: 'content-type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+      ['Access-Control-Allow-Origin']: '*',
     },
     body: response.Body.toString('base64'),
-    isBase64Encoded: true,
   };
 }
