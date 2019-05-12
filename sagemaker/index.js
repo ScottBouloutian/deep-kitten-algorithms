@@ -101,12 +101,14 @@ function annotateImage(file) {
   );
 }
 
-getFiles().pipe(
-  mergeMap(file => zip(
-      uploadFile(file),
-      annotateImage(file),
-  )),
-).subscribe(
-    ([s3Response]) => console.log(s3Response.key),
-    console.error,
-);
+function uploadData() {
+    getFiles().pipe(
+      mergeMap(file => zip(
+          uploadFile(file),
+          annotateImage(file),
+      )),
+    ).subscribe(
+        ([s3Response]) => console.log(s3Response.key),
+        console.error,
+    );
+}
