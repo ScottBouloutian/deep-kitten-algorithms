@@ -1,0 +1,12 @@
+{
+  "name": "cat-learning-lambda",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ScottBouloutian/cat-learning.git",
+  "author": "Scott Bouloutian <ScottBouloutian@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "busboy": "^0.3.1",
+    "rxjs": "^6.5.1"
+  }
+}

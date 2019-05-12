@@ -1,0 +1,16 @@
+service: cat-learning
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+functions:
+  inference:
+    handler: index.endpoint
+    timeout: 30
+    events:
+      - http:
+          path: inference
+          method: post
