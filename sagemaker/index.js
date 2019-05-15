@@ -1,5 +1,5 @@
 const { bindNodeCallback, from, zip } = require('rxjs');
-const { filter, mergeMap, toArray, map, take, tap } = require('rxjs/operators');
+const { filter, mergeMap, toArray, map, take, skip, bufferCount } = require('rxjs/operators');
 const fs = require('fs');
 const S3 = require('aws-sdk/clients/s3');
 const startsWith = require('lodash/fp/startsWith');
@@ -11,15 +11,17 @@ const forEach = require('lodash/fp/forEach');
 const slice = require('lodash/fp/slice');
 const _zip = require('lodash/fp/zip');
 const { loadImage, createCanvas } = require('canvas');
+const parseInt = require('lodash/fp/parseInt');
+const isNaN = require('lodash/fp/isNaN');
 
 const s3 = new S3({ apiVersion: '2006-03-01' });
-const dataDirectory = 'C:\\Users\\Scott\\Documents\\cats';
+const dataDirectory = '/Users/scottbouloutian/Desktop/cats';
 const readDir = bindNodeCallback(fs.readdir);
 const upload = bindNodeCallback(s3.upload.bind(s3));
 const readFile = bindNodeCallback(fs.readFile);
 const writeFile = bindNodeCallback(fs.writeFile);
 const unlink = bindNodeCallback(fs.unlink);
-const directoryPattern = /^CAT_00$/;
+const directoryPattern = /^CAT_04$/;
 const validationDirectory = "CAT_06";
 const filePattern = /^\d{8}_\d{3}\.jpg$/;
 const bucket = 'scottbouloutian-dev';
@@ -28,7 +30,6 @@ const bucket = 'scottbouloutian-dev';
 function getFiles() {
   return readDir(dataDirectory).pipe(
     mergeMap(from),
-    tap(console.log),
     filter(file => directoryPattern.test(file)),
     mergeMap(directory => (
       readDir(`${dataDirectory}/${directory}`).pipe(
@@ -58,13 +59,12 @@ function uploadFile(file) {
 function readFaceData(file) {
   return readFile(`${file.path}.cat`, 'utf8').pipe(
     map(split(' ')),
-    map(slice(1, 19)),
-    map(chunk(6)),
-    map(_zip([
-      'rgba(0,0,0,0.3)',
-      'rgba(0,0,0,0.6)',
-      'rgba(0,0,0,0.9)',
-    ])),
+    mergeMap(from),
+    skip(1),
+    map(parseInt(10)),
+    filter(number => !isNaN(number)),
+    bufferCount(2),
+    toArray(),
   )
 }
 
@@ -77,14 +77,35 @@ function annotateImage(file) {
     mergeMap(([image, data]) => {
       const canvas = createCanvas(image.width, image.height);
       const ctx = canvas.getContext('2d', { pixelFormat: 'A8' });
-      forEach(([color, points]) => {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(points[0], points[1]);
-        ctx.lineTo(points[2], points[3]);
-        ctx.lineTo(points[4], points[5]);
-        ctx.fill();
-      })(data);
+
+      // Draw eyes
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.arc(data[0][0], data[0][1], 16, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(data[1][0], data[1][1], 16, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Draw nose
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.beginPath();
+      ctx.arc(data[2][0], data[2][1], 16, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Draw ears
+      ctx.fillStyle = 'rgba(0,0,0,0.9)';
+      ctx.beginPath();
+      ctx.moveTo(data[3][0], data[3][1]);
+      ctx.lineTo(data[4][0], data[4][1]);
+      ctx.lineTo(data[5][0], data[5][1]);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(data[6][0], data[6][1]);
+      ctx.lineTo(data[7][0], data[7][1]);
+      ctx.lineTo(data[8][0], data[8][1]);
+      ctx.fill();
+
       const toBuffer = bindNodeCallback(canvas.toBuffer.bind(canvas));
       return toBuffer();
     }),
@@ -108,7 +129,7 @@ function uploadData() {
           annotateImage(file),
       )),
     ).subscribe(
-        ([s3Response]) => console.log(s3Response.key),
+        ([s3Response]) => console.log(s3Response),
         console.error,
     );
 }

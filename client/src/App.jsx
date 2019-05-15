@@ -4,18 +4,20 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import blue from '@material-ui/core/colors/blue';
-import grey from '@material-ui/core/colors/grey';
 import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
 import first from 'lodash/fp/first';
-import axios from 'axios';
 import isNull from 'lodash/fp/isNull';
+import axios from 'axios';
+import Snackbar from '@material-ui/core/Snackbar';
+import AddPhotoAlternate from '@material-ui/icons/AddPhotoAlternate';
+import AppSnackbarContent from './AppSnackbarContent';
+import loadingCat from './assets/loading-cat.gif';
 
 // Material theme
 const theme = createMuiTheme({
   palette: {
     primary: blue,
-    secondary: grey,
   },
   typography: {
     useNextVariants: true,
@@ -24,6 +26,12 @@ const theme = createMuiTheme({
 
 // Component styles
 const styles = {
+  toolbar: {
+    alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
   content: {
     alignItems: 'center',
     display: 'flex',
@@ -35,6 +43,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     display: 'flex',
+    flexDirection: 'column',
     height: 512,
     width: 512,
   },
@@ -42,6 +51,7 @@ const styles = {
     alignItems: 'center',
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'center',
   },
   canvas: {
     position: 'absolute',
@@ -49,12 +59,23 @@ const styles = {
   hidden: {
     display: 'none',
   },
+  addPhoto: {
+    color: 'gray',
+    height: 128,
+    width: 128,
+  },
+  loading: {
+    borderRadius: '50%',
+    position: 'absolute',
+  },
 };
 
 const App = ({ classes }) => {
   const [inputImage, setInputImage] = useState(null);
   const [outputImage, setOutputImage] = useState(null);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(null);
+  const [snackbarVariant, setSnackbarVariant] = useState('info');
   const canvasRef = useRef(null);
   const outputImageRef = useRef(null);
   const handleDrop = (event) => {
@@ -69,13 +90,23 @@ const App = ({ classes }) => {
     // Query for inference data
     const data = new FormData();
     data.append('file', file);
+    setLoading(true);
     axios({
       data,
       method: 'post',
       url: 'https://j2iwtz2fll.execute-api.us-east-1.amazonaws.com/dev/inference',
     })
-      .then(response => setOutputImage(`data:image/png;base64,${response.data}`))
-      .catch(setError);
+      .then((response) => {
+        setOutputImage(`data:image/png;base64,${response.data}`);
+        setSnackbarMessage('Success!');
+        setSnackbarVariant('success');
+        setLoading(false);
+      })
+      .catch((error) => {
+        setSnackbarMessage(error.message);
+        setSnackbarVariant('error');
+        setLoading(false);
+      });
   };
   const handleDragOver = event => event.preventDefault();
   const outputImageLoaded = () => {
@@ -114,8 +145,8 @@ const App = ({ classes }) => {
   return (
     <MuiThemeProvider theme={theme}>
       <AppBar>
-        <Toolbar>
-          <Typography color="secondary" variant="h6">Deep Kitten</Typography>
+        <Toolbar className={classes.toolbar}>
+          <Typography color="inherit" variant="h6">Deep Kitten</Typography>
         </Toolbar>
       </AppBar>
       <div className={classes.content}>
@@ -126,7 +157,7 @@ const App = ({ classes }) => {
               onDrop={handleDrop}
               onDragOver={handleDragOver}
             >
-              <Typography>drop an image here</Typography>
+              <AddPhotoAlternate classes={{ root: classes.addPhoto }} />
             </div>
           ) : (
             <img alt="input" src={inputImage} />
@@ -143,8 +174,24 @@ const App = ({ classes }) => {
               <canvas className={classes.canvas} ref={canvasRef} />
             </Fragment>
           ) }
+          { loading ? <img alt="loading" className={classes.loading} src={loadingCat} /> : null }
         </Paper>
       </div>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={!isNull(snackbarMessage)}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarMessage(null)}
+      >
+        <AppSnackbarContent
+          onClose={() => setSnackbarMessage(null)}
+          variant={snackbarVariant}
+          message={snackbarMessage}
+        />
+      </Snackbar>
     </MuiThemeProvider>
   );
 };

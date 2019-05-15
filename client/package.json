@@ -15,14 +15,17 @@
   },
   "dependencies": {
     "@material-ui/core": "^3.9.3",
+    "@material-ui/icons": "^3.0.2",
     "axios": "^0.18.0",
     "btoa": "^1.2.1",
+    "classnames": "^2.2.6",
     "lodash": "^4.17.11",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },
   "scripts": {
+    "build": "parcel build index.html --public-url /cat-learning",
     "start": "parcel index.html",
     "lint": "eslint src"
   }
