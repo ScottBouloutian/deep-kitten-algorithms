@@ -8,7 +8,7 @@
   "dependencies": {
     "@tensorflow/tfjs-node": "^1.0.3",
     "get-pixels": "^3.3.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "rxjs": "^6.4.0"
   }
 }
