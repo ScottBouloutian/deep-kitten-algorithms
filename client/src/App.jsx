@@ -94,7 +94,7 @@ const App = ({ classes }) => {
     axios({
       data,
       method: 'post',
-      url: 'https://j2iwtz2fll.execute-api.us-east-1.amazonaws.com/dev/inference',
+      url: 'https://tfkpb80bza.execute-api.us-east-1.amazonaws.com/dev/inference',
     })
       .then((response) => {
         setOutputImage(`data:image/png;base64,${response.data}`);
