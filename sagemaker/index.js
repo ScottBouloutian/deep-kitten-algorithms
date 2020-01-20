@@ -50,7 +50,7 @@ function uploadFile(file) {
   const stream = fs.createReadStream(file.path);
   return upload({
     Bucket: bucket,
-    Key: `cat-learning/${file.type}/${file.name}`,
+    Key: `deep-kitten/${file.type}/${file.name}`,
     Body: stream,
   });
 }

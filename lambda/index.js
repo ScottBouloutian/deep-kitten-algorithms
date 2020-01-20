@@ -36,7 +36,7 @@ module.exports.endpoint = async (event) => {
   const data = await parseFormData(event);
   const response = await invokeEndpoint({
     Body: data.file,
-    EndpointName: 'cat-learning-endpoint',
+    EndpointName: 'deep-kitten-endpoint',
     Accept: 'image/png',
     ContentType: 'image/jpeg',
   }).toPromise();

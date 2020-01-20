@@ -1,8 +1,8 @@
 {
-  "name": "cat-learning-tensorflow",
+  "name": "deep-kitten-tensorflow",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/ScottBouloutian/cat-learning.git",
+  "repository": "https://github.com/ScottBouloutian/deep-kitten.git",
   "author": "Scott Bouloutian <ScottBouloutian@gmail.com>",
   "license": "MIT",
   "dependencies": {

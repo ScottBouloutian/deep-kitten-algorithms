@@ -1,8 +1,8 @@
 {
-  "name": "cat-learning-client",
+  "name": "deep-kitten-client",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/ScottBouloutian/cat-learning.git",
+  "repository": "https://github.com/ScottBouloutian/deep-kitten.git",
   "author": "Scott Bouloutian <ScottBouloutian@gmail.com>",
   "license": "MIT",
   "devDependencies": {
@@ -25,7 +25,7 @@
     "react-dom": "^16.8.6"
   },
   "scripts": {
-    "build": "parcel build index.html --public-url /cat-learning",
+    "build": "parcel build index.html --public-url /deep-kitten",
     "start": "parcel index.html",
     "lint": "eslint src"
   }
