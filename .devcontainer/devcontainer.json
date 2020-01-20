@@ -1,0 +1,12 @@
+{
+    "name": "Jekyll",
+    "dockerFile": "Dockerfile",
+    "appPort": [4000],
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "extensions": [
+        "dbaeumer.vscode-eslint"
+    ],
+    "runArgs": ["-v", "${env:HOME}/.ssh:/root/.ssh"]
+}
