@@ -1,0 +1,10 @@
+version: '3'
+services:
+  dev:
+    command: sleep infinity
+    build:
+      context: .
+    volumes:
+      - ..:/workspace
+      - ~/.ssh:/root/.ssh
+      - ~/.aws:/root/.aws
