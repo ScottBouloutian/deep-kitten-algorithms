@@ -6,7 +6,7 @@
   "author": "Scott Bouloutian <ScottBouloutian@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.452.0",
+    "aws-sdk": "^2.814.0",
     "canvas": "^2.5.0",
     "lodash": "^4.17.13",
     "rxjs": "^6.5.1"
